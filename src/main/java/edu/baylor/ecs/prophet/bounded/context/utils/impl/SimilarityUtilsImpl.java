@@ -80,9 +80,14 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         }
 
         // if the entity names are too dissimilar then dont try
-        double nameSimilarity = nameSimilarity(entityOne.getEntityName(), entityOne.getEntityName());
+        double nameSimilarity = nameSimilarity(entityOne.getEntityName(), entityTwo.getEntityName());
         if(nameSimilarity < ENTITY_NAME_SIMILARITY_CUTOFF){
-            return new ImmutablePair<>(0.0, new HashMap<>());
+            return new ImmutablePair<>(nameSimilarity, new HashMap<>());
+        }
+
+        // if they both have no fields then return immediately
+        if(entityOne.getFields().size() == entityTwo.getFields().size() && entityOne.getFields().isEmpty()){
+            return new ImmutablePair<>(nameSimilarity, new HashMap<>());
         }
 
         // for each field find the similarity they have to other fields
@@ -149,7 +154,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         }
 
         // get the average of the field similarity
-        Double similarity = fieldSimilarity.entrySet().stream().mapToDouble(entry -> entry.getValue().isEmpty() ? 0.0 : entry.getValue().lastKey()).average().getAsDouble();
+        // Double similarity = fieldSimilarity.entrySet().stream().mapToDouble(entry -> entry.getValue().isEmpty() ? 0.0 : entry.getValue().lastKey()).average().getAsDouble();
 
         // get the field mapping
         Map<Field, Field> fieldMap = fieldSimilarity
@@ -165,7 +170,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
             ));
 
         // compute the return value
-        ImmutablePair<Double, Map<Field, Field> > toReturn = new ImmutablePair<>(similarity, fieldMap);
+        ImmutablePair<Double, Map<Field, Field> > toReturn = new ImmutablePair<>(nameSimilarity, fieldMap);
 
         // save the computed values to maybe short circuit next time
         lastComputedEntitySimilarity.entityOne = entityOne;

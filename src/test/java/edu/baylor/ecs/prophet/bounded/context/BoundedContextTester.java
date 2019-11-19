@@ -274,5 +274,31 @@ public class BoundedContextTester {
             assertNotEquals("", returnModule.getName());
             assertTrue(returnModule.getEntities().size() <= moduleOne.getEntities().size() + moduleTwo.getEntities().size());
         }
+
+        @Nested
+        @DisplayName("Name Similarity")
+        public class nameSimilarity{
+
+            @ParameterizedTest
+            @CsvSource(value = {"person, car", "car, dog", "mammal, ATM", "toll, nose", "moose, shirt"})
+            public void dissimilarTest(String modOneName, String modTwoName){
+                Entity entityOne = new Entity(modOneName);
+                Entity entityTwo = new Entity(modTwoName);
+
+                Module moduleOne = new Module("module one");
+                Module moduleTwo = new Module("module two");
+
+                // associate the first entity with the first module
+                moduleOne.getEntities().add(entityOne);
+
+                // associate the second entity with the second module
+                moduleTwo.getEntities().add(entityTwo);
+
+                Module mergedModule = boundedContextUtils.mergeModules(moduleOne, moduleTwo);
+
+                // make sure that there are two entities in the merged module
+                assertEquals(2, mergedModule.getEntities().size());
+            }
+        }
     }
 }
