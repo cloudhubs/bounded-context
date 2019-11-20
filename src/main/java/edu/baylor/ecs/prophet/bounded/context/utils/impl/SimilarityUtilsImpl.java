@@ -27,9 +27,6 @@ import java.util.stream.Collectors;
  */
 public class SimilarityUtilsImpl implements SimilarityUtils {
 
-    // the cutoff for when to consider two entities to be similar
-    private static final double ENTITY_NAME_SIMILARITY_CUTOFF = .8;
-
     // used for finding Wu Palmer similarity *******************
     private static ILexicalDatabase db = new NictWordNet();
     private static RelatednessCalculator rc = new WuPalmer(db);
@@ -81,12 +78,12 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
 
         // if the entity names are too dissimilar then dont try
         double nameSimilarity = nameSimilarity(entityOne.getEntityName(), entityTwo.getEntityName());
-        if(nameSimilarity < ENTITY_NAME_SIMILARITY_CUTOFF){
+        if(nameSimilarity < BoundedContextUtilsImpl.ENTITY_SIMILARITY_CUTOFF){
             return new ImmutablePair<>(nameSimilarity, new HashMap<>());
         }
 
         // if they both have no fields then return immediately
-        if(entityOne.getFields().size() == entityTwo.getFields().size() && entityOne.getFields().isEmpty()){
+        if(entityOne.getFields().size() == entityTwo.getFields().size() && entityOne.getFields().size() == 0){
             return new ImmutablePair<>(nameSimilarity, new HashMap<>());
         }
 

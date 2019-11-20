@@ -41,7 +41,7 @@ public class BoundedContextTester {
         Field personName = new Field("string", "name");
         Field personId = new Field("int", "id");
         Field personWeight = new Field("long", "weight");
-        person.setFields(Arrays.asList(personName, personId, personWeight));
+        person.setFields(new HashSet<>(Arrays.asList(personName, personId, personWeight)));
 
         // dog entity
         Entity dog = new Entity("dog");
@@ -50,18 +50,18 @@ public class BoundedContextTester {
         Field dogName = new Field("string", "name");
         Field dogOwner = new Field("object", "owner");
         dogOwner.setEntityReference(person);
-        dog.setFields(Arrays.asList(dogBreed, dogWeight, dogName));
+        dog.setFields(new HashSet<>(Arrays.asList(dogBreed, dogWeight, dogName)));
 
         // cat entity
         Entity cat = new Entity("cat");
         Field catBreed = new Field("string", "breed");
         Field catWeight = new Field("long", "weight");
         Field catName = new Field("string", "name");
-        cat.setFields(Arrays.asList(catBreed, catWeight, catName));
+        cat.setFields(new HashSet<>(Arrays.asList(catBreed, catWeight, catName)));
         Field catOwner = new Field("object", "owner");
         catOwner.setEntityReference(person);
 
-        moduleOne.setEntities(Arrays.asList(person, dog, cat));
+        moduleOne.setEntities(new HashSet<>(Arrays.asList(person, dog, cat)));
 
         // MODULE TWO *******************************************************
         moduleTwo = new Module("Module two");
@@ -72,7 +72,7 @@ public class BoundedContextTester {
         Field  m2_personId = new Field("long", "id");
         Field  m2_personWeight = new Field("string", "weight");
         Field  m2_personEthnicity = new Field("string", "ethnicity");
-        m2_person.setFields(Arrays.asList(m2_personName, m2_personId, m2_personWeight, m2_personEthnicity));
+        m2_person.setFields(new HashSet<>(Arrays.asList(m2_personName, m2_personId, m2_personWeight, m2_personEthnicity)));
 
         // car entity
         Entity m2_car = new Entity("Car");
@@ -81,7 +81,7 @@ public class BoundedContextTester {
         Field  car_color = new Field("long", "color");
         Field  car_serial_number = new Field("string", "serialNumber");
         Field  car_base_price = new Field("string", "base price");
-        m2_car.setFields(Arrays.asList(car_model, car_brand, car_color, car_serial_number, car_base_price));
+        m2_car.setFields(new HashSet<>(Arrays.asList(car_model, car_brand, car_color, car_serial_number, car_base_price)));
 
         // car entity
         Entity m2_motorcycle = new Entity("Motorcycle");
@@ -89,20 +89,23 @@ public class BoundedContextTester {
         Field  moto_brand = new Field("string", "brand");
         Field  moto_vin = new Field("long", "vin");
         Field  moto_engine = new Field("string", "engine");
-        m2_motorcycle.setFields(Arrays.asList(moto_model, moto_brand, moto_vin, moto_engine));
+        m2_motorcycle.setFields(new HashSet<>(Arrays.asList(moto_model, moto_brand, moto_vin, moto_engine)));
 
-        moduleTwo.setEntities(Arrays.asList(m2_person, m2_car, m2_motorcycle));
+        moduleTwo.setEntities(new HashSet<>(Arrays.asList(m2_person, m2_car, m2_motorcycle)));
 
         // associate the modules with the system context
-        systemContext.setModules(Arrays.asList(moduleOne, moduleTwo));
+        systemContext.setModules(new HashSet<>(Arrays.asList(moduleOne, moduleTwo)));
 
         simpleSystem = systemContext;
         dogEntity = dog;
         catentity = cat;
-        dogAndCatEntityAllFields = new Entity();
-        dogAndCatEntityAllFields.setEntityName("dog and cat");
-        List<Field> mixedFields = new ArrayList<>(dogEntity.getFields());
-        mixedFields.addAll(catentity.getFields());
+        dogAndCatEntityAllFields = new Entity("dog and cat");
+        Set<Field> mixedFields = new HashSet<>(dogEntity.getFields());
+        for(Field f : catentity.getFields()){
+            Field copy = f.clone();
+            copy.setName("cat" + copy.getName());
+            mixedFields.add(copy);
+        }
         dogAndCatEntityAllFields.setFields(mixedFields);
     }
 
@@ -218,7 +221,7 @@ public class BoundedContextTester {
         @DisplayName("Mapping to non existant field")
         public void testNonExistantFieldInMappingDest(){
             HashMap<Field, Field> fieldMapping = new HashMap<>();
-            fieldMapping.put(dogEntity.getFields().get(0), new Field("string", "NO_EXISTO"));
+            fieldMapping.put(dogEntity.getFields().iterator().next(), new Field("string", "NO_EXISTO"));
             assertThrows(FieldMappingException.class, () -> boundedContextUtils.mergeEntities(dogEntity, catentity, fieldMapping));
         }
 
@@ -226,7 +229,7 @@ public class BoundedContextTester {
         @DisplayName("Mapping from non existant field")
         public void testNonExistantFieldInMappingSource(){
             HashMap<Field, Field> fieldMapping = new HashMap<>();
-            fieldMapping.put(new Field("string", "NO_EXISTO"), dogEntity.getFields().get(0));
+            fieldMapping.put(new Field("string", "NO_EXISTO"), dogEntity.getFields().iterator().next());
             assertThrows(FieldMappingException.class, () -> boundedContextUtils.mergeEntities(dogEntity, catentity, fieldMapping));
         }
 
@@ -234,17 +237,19 @@ public class BoundedContextTester {
         @DisplayName("test single mapping")
         public void testGoodMapping(){
             HashMap<Field, Field> fieldMapping = new HashMap<>();
-            fieldMapping.put(dogEntity.getFields().get(0), catentity.getFields().get(0));
+            fieldMapping.put(dogEntity.getFields().iterator().next(), catentity.getFields().iterator().next());
             Entity result = boundedContextUtils.mergeEntities(dogEntity, catentity, fieldMapping);
-            assertEquals(result.getFields().size(), dogAndCatEntityAllFields.getFields().size() - 1);
+            assertEquals(result.getFields().size(), dogEntity.getFields().size() + catentity.getFields().size() - 1);
         }
 
         @Test
         @DisplayName("test two mappings to the same field")
         public void testDoubleMapping(){
             HashMap<Field, Field> fieldMapping = new HashMap<>();
-            fieldMapping.put(dogEntity.getFields().get(0), catentity.getFields().get(0));
-            fieldMapping.put(dogEntity.getFields().get(1), catentity.getFields().get(0));
+            fieldMapping.put(dogEntity.getFields().iterator().next(), catentity.getFields().iterator().next());
+            Iterator<Field> iter = dogEntity.getFields().iterator();
+            iter.next();
+            fieldMapping.put(iter.next(), catentity.getFields().iterator().next());
             assertThrows(FieldMappingException.class, () -> boundedContextUtils.mergeEntities(dogEntity, catentity, fieldMapping));
         }
 
@@ -252,9 +257,13 @@ public class BoundedContextTester {
         @DisplayName("test size n mapping")
         public void testNMapping(){
             HashMap<Field, Field> fieldMapping = new HashMap<>();
-            for(int i = 0; i< dogEntity.getFields().size(); i++){
-                fieldMapping.put(dogEntity.getFields().get(i), catentity.getFields().get(i));
+            Iterator<Field> dogIter = dogEntity.getFields().iterator();
+            Iterator<Field> catIter = catentity.getFields().iterator();
+
+            while(dogIter.hasNext()){
+                fieldMapping.put(dogIter.next(), catIter.next());
             }
+
             Entity result = boundedContextUtils.mergeEntities(dogEntity, catentity, fieldMapping);
             // all dog fields are consumed in the transformation
             assertEquals(result.getFields().size(), catentity.getFields().size());
@@ -282,8 +291,20 @@ public class BoundedContextTester {
             @ParameterizedTest
             @CsvSource(value = {"person, car", "car, dog", "mammal, ATM", "toll, nose", "moose, shirt"})
             public void dissimilarTest(String modOneName, String modTwoName){
-                Entity entityOne = new Entity(modOneName);
-                Entity entityTwo = new Entity(modTwoName);
+                testModuleMerging(modOneName, modTwoName, 2);
+                testModuleMerging(modTwoName, modOneName, 2  );
+            }
+
+            @ParameterizedTest
+            @CsvSource(value = {"person, user", "chair, stool", "child, kid", "horse, donkey", "shop, store"})
+            public void similarTest(String modOneName, String modTwoName){
+                testModuleMerging(modOneName, modTwoName, 1);
+                testModuleMerging(modTwoName, modOneName, 1);
+            }
+
+            public void testModuleMerging(String nameOne, String nameTwo, int expectedNumMergedEntities){
+                Entity entityOne = new Entity(nameOne);
+                Entity entityTwo = new Entity(nameTwo);
 
                 Module moduleOne = new Module("module one");
                 Module moduleTwo = new Module("module two");
@@ -297,8 +318,17 @@ public class BoundedContextTester {
                 Module mergedModule = boundedContextUtils.mergeModules(moduleOne, moduleTwo);
 
                 // make sure that there are two entities in the merged module
-                assertEquals(2, mergedModule.getEntities().size());
+                assertEquals(expectedNumMergedEntities, mergedModule.getEntities().size());
             }
         }
+    }
+
+    @Test
+    @DisplayName("Generate Bounded Context")
+    public void testBoundedContext(){
+        SystemContext systemContext   = new SystemContext("test System", new HashSet<>(Arrays.asList(moduleOne, moduleTwo)));
+        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
+        assertNotNull(boundedContext.getSystemName());
+        assertNotEquals(boundedContext.getSystemName().length(), 0);
     }
 }

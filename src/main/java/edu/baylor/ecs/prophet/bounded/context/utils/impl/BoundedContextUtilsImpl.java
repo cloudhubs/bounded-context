@@ -26,7 +26,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     // tools used for finding similarities
     private SimilarityUtils similarityUtils = new SimilarityUtilsImpl();
 
-    private static double ENTITY_SIMILARITY_CUTOFF = .9;
+    public static double ENTITY_SIMILARITY_CUTOFF = .9;
 
     /**
      * creates a bounded context for the system context
@@ -90,10 +90,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                     ))
                 ));
 
-        Module newModule = new Module();
+        Module newModule = new Module(moduleOne.getName());
 
-        newModule.setName(moduleOne.getName());
-        newModule.setEntities(new LinkedList<>());
+        newModule.setEntities(new HashSet<>());
 
         // sets the entities of the new module
         newModule.getEntities().addAll(
@@ -106,12 +105,13 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                             Map.Entry<Double, ImmutablePair<Entity, Map<Field, Field>>> val = x.getValue().lastEntry();
                             double similarity = val.getKey();
 
+                            // if the two modules should be merged
                             if(similarity > ENTITY_SIMILARITY_CUTOFF){
                                 return true;
                             }
                             else{
-                                newModule.getEntities().add(x.getKey());
-                                newModule.getEntities().add(val.getValue().getLeft());
+                                newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName()));
+                                newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName()));
                                 return false;
                             }
                         })
@@ -137,10 +137,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     public Entity mergeEntities(Entity one, Entity two, Map<Field, Field> fieldMapping) {
 
         // the entity that is to be returned
-        Entity newEntity = new Entity();
-
-        // set the entity name to the name of the first entity
-        newEntity.setEntityName(one.getEntityName());
+        Entity newEntity = new Entity(one.getEntityName());
 
         // get the fields of the second entity
         Set<Field> entityTwoFields = new HashSet<>(two.getFields());
@@ -150,11 +147,10 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             fieldMapping = new HashMap<>();
         }
 
-        Set<Field> alreadySeen = new HashSet<>();
         // make sure that all fields in the field mapping are also in f1 and that no two map to the same value
         for(Map.Entry<Field, Field> f : fieldMapping.entrySet()){
             // TODO make this more efficient
-            if(!one.getFields().contains(f.getKey()) || !alreadySeen.add(f.getValue())){
+            if(!one.getFields().contains(f.getKey())){
                 throw new FieldMappingException();
             }
         }
@@ -166,10 +162,14 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             Field f2 = fieldMapping.get(f1);
             toAdd = f1;
 
+            String preface = "";
+
             if (f2 != null) {
 
+                preface = one.getEntityName() + "::";
+
                 //make sure that mapped to field is present in entity 2
-                if (!entityTwoFields.remove(f2)) {
+                if (!entityTwoFields.contains(f2)) {
 
                     // will be thrown if the entity mapping is invalid
                     throw new FieldMappingException("Field not found in entity 2 " + f2.toString());
@@ -189,11 +189,19 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 
             // add the field
             // TODO what if a field of this name already exists?
+            Field newField = toAdd.clone();
+            toAdd.setName(preface + toAdd.getName());
             newEntity.getFields().add(toAdd);
         }
 
         // add all of the remaining fields in entity 2
-        newEntity.getFields().addAll(entityTwoFields);
+        // make a copy of all of the field in entity 2
+        Set<Field> entityTwoFieldsMapped = entityTwoFields.stream().map(x -> {
+            Field fieldCopy = x.clone();
+            fieldCopy.setName(two.getEntityName() + "::" + fieldCopy.getName());
+            return fieldCopy;
+        }).collect(Collectors.toSet());
+        newEntity.getFields().addAll(entityTwoFieldsMapped);
 
         return newEntity;
     }
