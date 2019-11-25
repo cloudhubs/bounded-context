@@ -43,9 +43,11 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         if(!mergedModule.isPresent()){
             throw new RuntimeException("Unable to merge the Contexts");
         }
+
         Module m = mergedModule.get();
 
         //create the bounded context
+        // use the name of the system context as the name of the bounded context
         BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), m.getEntities());
         return toReturn;
     }
@@ -147,10 +149,20 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             fieldMapping = new HashMap<>();
         }
 
+        Set<Field> alreadyEncountered = new HashSet<>();
+
         // make sure that all fields in the field mapping are also in f1 and that no two map to the same value
-        for(Map.Entry<Field, Field> f : fieldMapping.entrySet()){
-            // TODO make this more efficient
+        for(final Map.Entry<Field, Field> f : fieldMapping.entrySet()){
+            // make sure that the key exists
             if(!one.getFields().contains(f.getKey())){
+                throw new FieldMappingException();
+            }
+            //make sure that the value exists
+            if(!entityTwoFields.contains(f.getValue())){
+                throw new FieldMappingException();
+            }
+            // if the second has already been mapped too
+            if(!alreadyEncountered.add(f.getValue())){
                 throw new FieldMappingException();
             }
         }
@@ -162,27 +174,24 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             Field f2 = fieldMapping.get(f1);
             toAdd = f1;
 
-            String preface = "";
+            String preface = one.getEntityName() + "::";
 
             if (f2 != null) {
 
-                preface = one.getEntityName() + "::";
-
                 //make sure that mapped to field is present in entity 2
-                if (!entityTwoFields.contains(f2)) {
-
-                    // will be thrown if the entity mapping is invalid
-                    throw new FieldMappingException("Field not found in entity 2 " + f2.toString());
-                }
+                entityTwoFields.remove(f2);
 
                 //see if they are both entity references to different things add them both
                 if(f1.getEntityReference() != null && f2.getEntityReference() != null && !f2.equals(f1)){
-                    newEntity.getFields().add(f2);
+                    Field twoCopy = f2.clone();
+                    twoCopy.setName(two.getEntityName() + "::" + twoCopy.getName());
+                    newEntity.getFields().add(twoCopy);
                     toAdd = f1;
                 }
 
                 // merge the fields into one field
                 else {
+                    preface = "";
                     toAdd = mergeFields(f1, f2);
                 }
             }
@@ -190,8 +199,8 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             // add the field
             // TODO what if a field of this name already exists?
             Field newField = toAdd.clone();
-            toAdd.setName(preface + toAdd.getName());
-            newEntity.getFields().add(toAdd);
+            newField.setName(preface + newField.getName());
+            newEntity.getFields().add(newField);
         }
 
         // add all of the remaining fields in entity 2
