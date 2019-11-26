@@ -90,6 +90,10 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         // for each field find the similarity they have to other fields
         final Map<Field, TreeMap<Double, Field>>  fieldSimilarity = new HashMap<>();
 
+        if(entityOne.getEntityName().equals("Person")){
+            int cat = 1;
+        }
+
         // get each field in entity one
         entityOne.getFields()
                 // for each field put
@@ -135,17 +139,24 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
 
                             // if this one is better then remove the old one and restart the whole algorithm
                             if (val > encountered.get(best).getLeft()) {
-                                encountered.get(best).getRight().remove(best);
+                                encountered.get(best).getRight().remove(val);
                                 encountered.put(best, new ImmutablePair<>(val, entry.getValue()));
                                 changeOccurred = true;
+                                break;
                             }
                             // if the other one is better then remove this one and get the next best mapping
                             else {
-                                entry.getValue().remove(best);
+                                entry.getValue().remove(val);
                                 repeat = true;
                             }
+                        }else{
+                            encountered.put(best, new ImmutablePair<>(val, entry.getValue()));
                         }
                     }
+                }
+                if(changeOccurred){
+                    encountered.clear();
+                    break;
                 }
             }
         }
