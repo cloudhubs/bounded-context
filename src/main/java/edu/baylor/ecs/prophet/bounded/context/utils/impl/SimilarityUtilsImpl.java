@@ -139,7 +139,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
 
                             // if this one is better then remove the old one and restart the whole algorithm
                             if (val > encountered.get(best).getLeft()) {
-                                encountered.get(best).getRight().remove(val);
+                                encountered.get(best).getRight().values().removeIf(x -> x.equals(best));
                                 encountered.put(best, new ImmutablePair<>(val, entry.getValue()));
                                 changeOccurred = true;
                                 break;
@@ -164,18 +164,12 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         // get the average of the field similarity
         // Double similarity = fieldSimilarity.entrySet().stream().mapToDouble(entry -> entry.getValue().isEmpty() ? 0.0 : entry.getValue().lastKey()).average().getAsDouble();
 
+        Map<Field, Field> fieldMap = new HashMap<>();
         // get the field mapping
-        Map<Field, Field> fieldMap = fieldSimilarity
+        fieldSimilarity
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(
-                x -> x.getKey(),
-                x->
-                    // if there is a field put it in the mapping, else put null
-                    {
-                        return x.getValue().isEmpty() ? null : x.getValue().lastEntry().getValue();
-                    }
-            ));
+                .forEach(x -> fieldMap.put(x.getKey(),  x.getValue().isEmpty() ? null : x.getValue().lastEntry().getValue()));
 
         // compute the return value
         ImmutablePair<Double, Map<Field, Field> > toReturn = new ImmutablePair<>(nameSimilarity, fieldMap);

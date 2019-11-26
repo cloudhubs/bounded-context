@@ -153,6 +153,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 
         // make sure that all fields in the field mapping are also in f1 and that no two map to the same value
         for(final Map.Entry<Field, Field> f : fieldMapping.entrySet()){
+            if(Objects.isNull(f.getValue())){
+                continue;
+            }
             // make sure that the key exists
             if(!one.getFields().contains(f.getKey())){
                 throw new FieldMappingException();
