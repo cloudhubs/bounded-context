@@ -90,10 +90,6 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         // for each field find the similarity they have to other fields
         final Map<Field, TreeMap<Double, Field>>  fieldSimilarity = new HashMap<>();
 
-        if(entityOne.getEntityName().equals("Person")){
-            int cat = 1;
-        }
-
         // get each field in entity one
         entityOne.getFields()
                 // for each field put
