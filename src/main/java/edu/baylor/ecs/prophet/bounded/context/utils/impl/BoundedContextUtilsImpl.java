@@ -37,7 +37,24 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     public BoundedContext createBoundedContext(SystemContext systemContext) {
 
         // take all of the modules in the System context and merge them
-        Optional<Module> mergedModule = systemContext.getModules().stream().reduce(this::mergeModules);
+        Optional<Module> mergedModule = systemContext.getModules().stream().reduce(this::mergeModules); //wrong, what
+        // if you end up with merged modules with zero entities -> two modules are different
+        //then you merge with another module, and you have zero once again. Debug on json in src/test/resources
+        Set<Module> modules = systemContext.getModules();
+        Stack<Module> moduleStack = new Stack<>();
+        for (Module m: modules
+             ) {
+            moduleStack.add(m.clone());
+        }
+//        moduleStack.addAll(modules);
+        while(moduleStack.size() > 1){
+            Module m1 = moduleStack.pop();
+            Module m2 = moduleStack.pop();
+            Module result = mergeModules(m1, m2);
+            if (result.getEntities().size() > 0){
+                moduleStack.push(result);
+            }
+        }
 
         // make sure that the modules were able to merge properly
         if(!mergedModule.isPresent()){
@@ -104,18 +121,35 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 
                         // if the similarity is strong enough
                         .filter(x -> {
-                            Map.Entry<Double, ImmutablePair<Entity, Map<Field, Field>>> val = x.getValue().lastEntry();
-                            double similarity = val.getKey();
+                            if (x != null){
+                                if (x.getValue() != null){
+                                    if (x.getValue().lastEntry() != null){
 
-                            // if the two modules should be merged
-                            if(similarity > ENTITY_SIMILARITY_CUTOFF){
-                                return true;
-                            }
-                            else{
-                                newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName()));
-                                newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName()));
+                                        Map.Entry<Double, ImmutablePair<Entity, Map<Field, Field>>> val = x.getValue().lastEntry();
+                                        double similarity = val.getKey();
+
+                                        // if the two modules should be merged
+                                        if(similarity > ENTITY_SIMILARITY_CUTOFF){
+                                            return true;
+                                        }
+                                        else{
+                                            newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName()));
+                                            newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName()));
+                                            return false;
+                                        }
+                                    } else {
+                                        System.out.println("is null last entry");
+                                        return false;
+                                    }
+                                } else {
+                                    System.out.println("get value is null");
+                                    return false;
+                                }
+                            } else {
+                                System.out.println("x is null");
                                 return false;
                             }
+
                         })
 
                         // map each mapping between entities to a new merged entity
