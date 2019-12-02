@@ -47,11 +47,11 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             moduleStack.add(m.clone());
         }
 //        moduleStack.addAll(modules);
-        while(moduleStack.size() > 1){
+        while(moduleStack.size() > 1) {
             Module m1 = moduleStack.pop();
             Module m2 = moduleStack.pop();
             Module result = mergeModules(m1, m2);
-            if (result.getEntities().size() > 0){
+            if (result.getEntities().size() > 0) {
                 moduleStack.push(result);
             }
         }
@@ -61,12 +61,19 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             throw new RuntimeException("Unable to merge the Contexts");
         }
 
-        Module m = mergedModule.get();
+        if (moduleStack.size() > 0){
+            Module m = moduleStack.get(0); //ToDo: unsafe
+            //create the bounded context
+            // use the name of the system context as the name of the bounded context
+            BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), m.getEntities());
+            return toReturn;
+        } else {
+            BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), null);
+            return toReturn;
+        }
 
-        //create the bounded context
-        // use the name of the system context as the name of the bounded context
-        BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), m.getEntities());
-        return toReturn;
+
+
     }
 
     /**
