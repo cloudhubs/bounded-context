@@ -1,5 +1,6 @@
 package edu.baylor.ecs.prophet.bounded.context;
 
+import com.google.gson.Gson;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.*;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Module;
 import edu.baylor.ecs.prophet.bounded.context.exception.FieldMappingException;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -330,5 +332,27 @@ public class BoundedContextTester {
         BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
         assertNotNull(boundedContext.getSystemName());
         assertNotEquals(boundedContext.getSystemName().length(), 0);
+    }
+
+    @Test
+    @DisplayName("Generate Bounded Context From File")
+    public void generateBoundedContextFromFile(){
+        try {
+            String file = "src/test/resources/systemContext.json";
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            StringBuilder builder = new StringBuilder();
+            String currentLine = reader.readLine();
+            while (currentLine != null) {
+                builder.append(currentLine);
+                currentLine = reader.readLine();
+            }
+            reader.close();
+            Gson gson = new Gson();
+            SystemContext systemContext = gson.fromJson(builder.toString(), SystemContext.class);
+            BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
+            assertNotNull(boundedContext.getSystemName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -37,19 +37,43 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     public BoundedContext createBoundedContext(SystemContext systemContext) {
 
         // take all of the modules in the System context and merge them
-        Optional<Module> mergedModule = systemContext.getModules().stream().reduce(this::mergeModules);
+        Optional<Module> mergedModule = systemContext.getModules().stream().reduce(this::mergeModules); //wrong, what
+        // if you end up with merged modules with zero entities -> two modules are different
+        //then you merge with another module, and you have zero once again. Debug on json in src/test/resources
+        Set<Module> modules = systemContext.getModules();
+        Stack<Module> moduleStack = new Stack<>();
+        for (Module m: modules
+             ) {
+            moduleStack.add(m.clone());
+        }
+//        moduleStack.addAll(modules);
+        while(moduleStack.size() > 1) {
+            Module m1 = moduleStack.pop();
+            Module m2 = moduleStack.pop();
+            Module result = mergeModules(m1, m2);
+            if (result.getEntities().size() > 0) {
+                moduleStack.push(result);
+            }
+        }
 
         // make sure that the modules were able to merge properly
         if(!mergedModule.isPresent()){
             throw new RuntimeException("Unable to merge the Contexts");
         }
 
-        Module m = mergedModule.get();
+        if (moduleStack.size() > 0){
+            Module m = moduleStack.get(0); //ToDo: unsafe
+            //create the bounded context
+            // use the name of the system context as the name of the bounded context
+            BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), m.getEntities());
+            return toReturn;
+        } else {
+            BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), null);
+            return toReturn;
+        }
 
-        //create the bounded context
-        // use the name of the system context as the name of the bounded context
-        BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), m.getEntities());
-        return toReturn;
+
+
     }
 
     /**
@@ -114,8 +138,10 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                             else{
                                 newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName() + "::"));
                                 newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName() + "::"));
+
                                 return false;
                             }
+
                         })
 
                         // map each mapping between entities to a new merged entity
