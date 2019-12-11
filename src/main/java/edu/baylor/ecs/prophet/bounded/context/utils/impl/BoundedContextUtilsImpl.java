@@ -112,8 +112,8 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                                 return true;
                             }
                             else{
-                                newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName()));
-                                newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName()));
+                                newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName() + "::"));
+                                newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName() + "::"));
                                 return false;
                             }
                         })
