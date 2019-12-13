@@ -185,7 +185,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
      */
     @Override
     public double nameSimilarity(String one, String two) {
-        return wordSimilarity(one, POS.n, two, POS.n);
+        return wordSimilarity(NameStripper.getBasicName(one), POS.n, NameStripper.getBasicName(two), POS.n);
     }
 
     /**

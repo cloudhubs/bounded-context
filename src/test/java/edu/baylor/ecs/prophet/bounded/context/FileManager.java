@@ -7,7 +7,7 @@ import java.io.*;
 
 public class FileManager {
 
-    public SystemContext readSystemContextFromFile(String fileName) throws FileNotFoundException {
+    public static SystemContext readSystemContextFromFile(String fileName) throws FileNotFoundException {
         Gson gson = new Gson();
         Reader in = new FileReader(fileName);
         return gson.fromJson(in, SystemContext.class);

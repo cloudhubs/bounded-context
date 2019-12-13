@@ -36,10 +36,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     @Override
     public BoundedContext createBoundedContext(SystemContext systemContext) {
 
-        // take all of the modules in the System context and merge them
-        Optional<Module> mergedModule = systemContext.getModules().stream().reduce(this::mergeModules); //wrong, what
-        // if you end up with merged modules with zero entities -> two modules are different
-        //then you merge with another module, and you have zero once again. Debug on json in src/test/resources
+        // sanitize all of the name in the systemContext
+        NameStripper.sanitizeSystemContext(systemContext);
+
         Set<Module> modules = systemContext.getModules();
         Stack<Module> moduleStack = new Stack<>();
         for (Module m: modules
@@ -56,23 +55,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             }
         }
 
-        // make sure that the modules were able to merge properly
-        if(!mergedModule.isPresent()){
-            throw new RuntimeException("Unable to merge the Contexts");
-        }
-
-        if (moduleStack.size() > 0){
-            Module m = moduleStack.get(0); //ToDo: unsafe
-            //create the bounded context
-            // use the name of the system context as the name of the bounded context
-            BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), m.getEntities());
-            return toReturn;
-        } else {
-            BoundedContext toReturn = new BoundedContext(systemContext.getSystemName(), null);
-            return toReturn;
-        }
-
-
+        return new BoundedContext(systemContext.getSystemName(), moduleStack.size() > 0 ? moduleStack.get(0).getEntities() : null);
 
     }
 
@@ -88,6 +71,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         // for each entity find the similarity it has to other entities
         final Map<Entity, TreeMap<Double, ImmutablePair<Entity, Map<Field, Field>>>>
                 entitySimilarity = new HashMap<>();
+
+        // shows which entities in module two are encountered
+        Set<Entity> mappedInTwo = new HashSet<>();
 
         // get all entities in module one
         moduleOne.getEntities()
@@ -131,6 +117,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                             Map.Entry<Double, ImmutablePair<Entity, Map<Field, Field>>> val = x.getValue().lastEntry();
                             double similarity = val.getKey();
 
+                            // add the one mapped to
+                            mappedInTwo.add(val.getValue().getLeft());
+
                             // if the two modules should be merged
                             if(similarity > ENTITY_SIMILARITY_CUTOFF){
                                 return true;
@@ -150,6 +139,13 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                         // collect as a list
                         .collect(Collectors.toList())
         );
+
+        // now add all of the entities in module two that were not mapped to
+        for(Entity e : moduleTwo.getEntities()){
+            if(!mappedInTwo.contains(e)){
+                newModule.getEntities().add(e);
+            }
+        }
 
         return newModule;
     }
@@ -184,15 +180,15 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             }
             // make sure that the key exists
             if(!one.getFields().contains(f.getKey())){
-                throw new FieldMappingException();
+                //throw new FieldMappingException();
             }
             //make sure that the value exists
             if(!entityTwoFields.contains(f.getValue())){
-                throw new FieldMappingException();
+                //throw new FieldMappingException();
             }
             // if the second has already been mapped too
             if(!alreadyEncountered.add(f.getValue())){
-                throw new FieldMappingException();
+                //throw new FieldMappingException();
             }
         }
 
