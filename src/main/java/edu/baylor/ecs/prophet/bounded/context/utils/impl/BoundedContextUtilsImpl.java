@@ -180,7 +180,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             }
             // make sure that the key exists
             if(!one.getFields().contains(f.getKey())){
-                //throw new FieldMappingException();
+                throw new FieldMappingException();
             }
             //make sure that the value exists
             if(!entityTwoFields.contains(f.getValue())){
@@ -188,7 +188,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             }
             // if the second has already been mapped too
             if(!alreadyEncountered.add(f.getValue())){
-                //throw new FieldMappingException();
+                throw new FieldMappingException();
             }
         }
 
