@@ -105,7 +105,7 @@ public class BoundedContextTester {
         Set<Field> mixedFields = new HashSet<>(dogEntity.getFields());
         for(Field f : catentity.getFields()){
             Field copy = f.clone();
-            copy.setName("cat" + copy.getName());
+            copy.setName(new Name("cat" + copy.getName().getName()));
             mixedFields.add(copy);
         }
         dogAndCatEntityAllFields.setFields(mixedFields);

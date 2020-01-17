@@ -59,7 +59,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
     @Override
     public double localFieldSimilarity(Field fieldOne, Field fieldTwo) {
         //TODO is this good enough?
-        return nameSimilarity(fieldOne.getName(), fieldTwo.getName());
+        return nameSimilarity(fieldOne.getName().getName(), fieldTwo.getName().getName());
     }
 
     /**
