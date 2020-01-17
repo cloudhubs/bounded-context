@@ -77,7 +77,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         }
 
         // if the entity names are too dissimilar then dont try
-        double nameSimilarity = nameSimilarity(entityOne.getEntityName(), entityTwo.getEntityName());
+        double nameSimilarity = nameSimilarity(entityOne.getEntityName().getName(), entityTwo.getEntityName().getName());
         if(nameSimilarity < BoundedContextUtilsImpl.ENTITY_SIMILARITY_CUTOFF){
             return new ImmutablePair<>(nameSimilarity, new HashMap<>());
         }

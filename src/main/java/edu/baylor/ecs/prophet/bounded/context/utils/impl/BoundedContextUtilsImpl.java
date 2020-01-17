@@ -184,7 +184,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             }
             //make sure that the value exists
             if(!entityTwoFields.contains(f.getValue())){
-                //throw new FieldMappingException();
+                throw new FieldMappingException();
             }
             // if the second has already been mapped too
             if(!alreadyEncountered.add(f.getValue())){
