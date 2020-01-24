@@ -1,9 +1,7 @@
 package edu.baylor.ecs.prophet.bounded.context.utils.impl;
 
-import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Entity;
-import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Field;
+import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.*;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Module;
-import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.SystemContext;
 
 public class NameStripper {
 
@@ -14,12 +12,12 @@ public class NameStripper {
 
     public static void sanitizeSystemContext(SystemContext toSanitize){
         for(Module m : toSanitize.getModules()){
-            m.setName(getBasicName(m.getName()));
+            m.setName(new Name(getBasicName(m.getName().getName())));
             for(Entity e : m.getEntities()){
                 // make the full name just the simple name
                 e.getEntityName().setFullName(e.getEntityName().getName());
                 for(Field f : e.getFields()){
-                    f.setName(getBasicName(f.getName()));
+                    f.getName().setFullName(getBasicName(f.getName().getName()));
                 }
             }
         }

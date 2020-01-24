@@ -102,7 +102,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                     ))
                 ));
 
-        Module newModule = new Module(moduleOne.getName());
+        Module newModule = new Module(moduleOne.getName().getName());
 
         newModule.setEntities(new HashSet<>());
 
@@ -180,15 +180,15 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             }
             // make sure that the key exists
             if(!one.getFields().contains(f.getKey())){
-                //throw new FieldMappingException();
+                throw new FieldMappingException();
             }
             //make sure that the value exists
             if(!entityTwoFields.contains(f.getValue())){
-                //throw new FieldMappingException();
+                throw new FieldMappingException();
             }
             // if the second has already been mapped too
             if(!alreadyEncountered.add(f.getValue())){
-                //throw new FieldMappingException();
+                throw new FieldMappingException();
             }
         }
 
@@ -209,7 +209,8 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                 //see if they are both entity references to different things add them both
                 if(f1.getEntityReference() != null && f2.getEntityReference() != null && !f2.equals(f1)){
                     Field twoCopy = f2.clone();
-                    twoCopy.setName(two.getEntityName() + "::" + twoCopy.getName());
+                    String newName = two.getEntityName().getName() + "::" + twoCopy.getName().getName();
+                    twoCopy.getName().setFullName(newName);
                     newEntity.getFields().add(twoCopy);
                     toAdd = f1;
                 }
@@ -224,7 +225,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             // add the field
             // TODO what if a field of this name already exists?
             Field newField = toAdd.clone();
-            newField.setName(preface + newField.getName());
+            newField.getName().setFullName(preface + newField.getName().getName());
             newEntity.getFields().add(newField);
         }
 
@@ -232,7 +233,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         // make a copy of all of the field in entity 2
         Set<Field> entityTwoFieldsMapped = entityTwoFields.stream().map(x -> {
             Field fieldCopy = x.clone();
-            fieldCopy.setName(two.getEntityName() + "::" + fieldCopy.getName());
+            fieldCopy.getName().setFullName(two.getEntityName().getName() + "::" + fieldCopy.getName().getName());
             return fieldCopy;
         }).collect(Collectors.toSet());
         newEntity.getFields().addAll(entityTwoFieldsMapped);
@@ -248,7 +249,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
      */
     @Override
     public Field mergeFields(Field one, Field two) {
-        String name = one.getName();
+        String name = one.getName().getName();
         String type = Type.get(one.getType()).ordinal() < Type.get(two.getType()).ordinal() ? two.getType() : one.getType();
 
         Field toReturn = new Field(type, name);
