@@ -359,7 +359,7 @@ public class BoundedContextTester {
     @Test
     @DisplayName("Jan Master Project Test")
     public void janTest() throws FileNotFoundException{
-        SystemContext systemContext = FileManager.readSystemContextFromFile("systemContext.json");
+        SystemContext systemContext = FileManager.readSystemContextFromFile("src/test/resources/systemContext.json");
         BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
         assertNotNull(boundedContext.getSystemName());
     }
