@@ -114,6 +114,12 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 
                         // if the similarity is strong enough
                         .filter(x -> {
+                            // if it is not mapped to anything, no merging needs to be performed
+                            if(x.getValue().isEmpty()){
+                                newModule.getEntities().add(x.getKey().clone());
+                                return false;
+                            }
+
                             Map.Entry<Double, ImmutablePair<Entity, Map<Field, Field>>> val = x.getValue().lastEntry();
                             double similarity = val.getKey();
 
@@ -121,10 +127,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                             mappedInTwo.add(val.getValue().getLeft());
 
                             // if the two modules should be merged
-                            if(similarity > ENTITY_SIMILARITY_CUTOFF){
+                            if (similarity > ENTITY_SIMILARITY_CUTOFF) {
                                 return true;
-                            }
-                            else{
+                            } else {
                                 newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName() + "::"));
                                 newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName() + "::"));
 
