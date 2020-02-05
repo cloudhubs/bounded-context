@@ -69,7 +69,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     public Module mergeModules(Module moduleOne, Module moduleTwo){
 
         // for each entity find the similarity it has to other entities
-        final Map<Entity, TreeMap<Double, ImmutablePair<Entity, Map<Field, Field>>>>
+        Map<Entity, TreeMap<Double, ImmutablePair<Entity, Map<Field, Field>>>>
                 entitySimilarity = new HashMap<>();
 
         // shows which entities in module two are encountered
@@ -123,15 +123,16 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                             Map.Entry<Double, ImmutablePair<Entity, Map<Field, Field>>> val = x.getValue().lastEntry();
                             double similarity = val.getKey();
 
-                            // add the one mapped to
-                            mappedInTwo.add(val.getValue().getLeft());
-
-                            // if the two modules should be merged
+                            // if the two entities should be merged
                             if (similarity > ENTITY_SIMILARITY_CUTOFF) {
+                                // add the one mapped to
+                                mappedInTwo.add(val.getValue().getLeft());
+
                                 return true;
                             } else {
                                 newModule.getEntities().add(x.getKey().copyWithNamePreface(moduleOne.getName() + "::"));
-                                newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName() + "::"));
+                                //val.getValue().getLeft().getEntityName().setFullName(moduleTwo.getName() + val.getValue().getLeft().getEntityName().getFullName() + "::");
+                                //newModule.getEntities().add(val.getValue().getLeft().copyWithNamePreface(moduleTwo.getName() + "::"));
 
                                 return false;
                             }
