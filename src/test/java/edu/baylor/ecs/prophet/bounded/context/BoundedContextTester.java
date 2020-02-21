@@ -17,7 +17,6 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class BoundedContextTester {
 
     private static SystemContext simpleSystem = null;
@@ -48,8 +47,8 @@ public class BoundedContextTester {
         Field dogBreed = new Field("string", "breed");
         Field dogWeight = new Field("long", "weight");
         Field dogName = new Field("string", "name");
-        Field dogOwner = new Field("object", "owner");
-        dogOwner.setEntityReference(person);
+        Field dogOwner = new Field("Person", "owner");
+        dogOwner.setReference(true);
         dog.setFields(new HashSet<>(Arrays.asList(dogBreed, dogWeight, dogName)));
 
         // cat entity
@@ -58,8 +57,8 @@ public class BoundedContextTester {
         Field catWeight = new Field("long", "weight");
         Field catName = new Field("string", "name");
         cat.setFields(new HashSet<>(Arrays.asList(catBreed, catWeight, catName)));
-        Field catOwner = new Field("object", "owner");
-        catOwner.setEntityReference(person);
+        Field catOwner = new Field("Person", "owner");
+        catOwner.setReference(true);
 
         moduleOne.setEntities(new HashSet<>(Arrays.asList(person, dog, cat)));
 
@@ -335,7 +334,15 @@ public class BoundedContextTester {
     @Test
     @DisplayName("Jan Master Project Test")
     public void janTest() throws FileNotFoundException{
-        SystemContext systemContext = FileManager.readSystemContextFromFile("src/test/resources/systemContext.json");
+        SystemContext systemContext = FileManager.readSystemContextFromFile("src/test/resources/jan_systemContext.json");
+        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
+        assertNotNull(boundedContext.getSystemName());
+    }
+
+    @Test
+    @DisplayName("TSM2 Test")
+    public void tsm2Test() throws FileNotFoundException{
+        SystemContext systemContext = FileManager.readSystemContextFromFile("src/test/resources/tsm2_systemContext.json");
         BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
         assertNotNull(boundedContext.getSystemName());
     }

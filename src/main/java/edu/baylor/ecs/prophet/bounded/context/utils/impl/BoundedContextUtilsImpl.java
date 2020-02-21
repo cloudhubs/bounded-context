@@ -212,8 +212,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                 //make sure that mapped to field is present in entity 2
                 entityTwoFields.remove(f2);
 
-                //see if they are both entity references to different things add them both
-                if(f1.getEntityReference() != null && f2.getEntityReference() != null && !f2.equals(f1)){
+                if (f1.isReference() && f2.isReference() && !f1.equals(f2)) {
                     Field twoCopy = f2.clone();
                     String newName = two.getEntityName().getName() + "::" + twoCopy.getName().getName();
                     twoCopy.getName().setFullName(newName);
@@ -264,9 +263,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         toReturn.setAnnotations(one.getAnnotations());
         toReturn.getAnnotations().addAll(two.getAnnotations());
 
-        // set the entity reference (if it is present)
-        // ASSUMED THAT BOTH DO NOT HAVE DIFFERENT ENTITY REFERENCES
-        toReturn.setEntityReference(one.getEntityReference() == null ? two.getEntityReference() : one.getEntityReference());
+        toReturn.setReference(one.isReference() | two.isReference());
 
         return toReturn;
     }
