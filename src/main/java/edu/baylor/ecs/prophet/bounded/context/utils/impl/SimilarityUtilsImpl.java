@@ -57,9 +57,9 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
      * @return the similarity of the fields
      */
     @Override
-    public double localFieldSimilarity(Field fieldOne, Field fieldTwo) {
+    public double localFieldSimilarity(Field fieldOne, Field fieldTwo, boolean useWuPalmer) {
         //TODO is this good enough?
-        return nameSimilarity(fieldOne.getName().getName(), fieldTwo.getName().getName());
+        return nameSimilarity(fieldOne.getName().getName(), fieldTwo.getName().getName(), useWuPalmer);
     }
 
     /**
@@ -69,7 +69,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
      * @return tuple of similarity of the entities as well as the mapping between their fields
      */
     @Override
-    public ImmutablePair<Double, Map<Field, Field> > globalFieldSimilarity(Entity entityOne, Entity entityTwo) {
+    public ImmutablePair<Double, Map<Field, Field> > globalFieldSimilarity(Entity entityOne, Entity entityTwo, boolean useWuPalmer) {
         //store the result of the last comp
         // intentionally using == here instead of equals because we only short circuit for exact objects
         if(entityOne == lastComputedEntitySimilarity.entityOne && entityTwo == lastComputedEntitySimilarity.entityTwo){
@@ -77,7 +77,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
         }
 
         // if the entity names are too dissimilar then dont try
-        double nameSimilarity = nameSimilarity(entityOne.getEntityName().getName(), entityTwo.getEntityName().getName());
+        double nameSimilarity = nameSimilarity(entityOne.getEntityName().getName(), entityTwo.getEntityName().getName(), useWuPalmer);
         if(nameSimilarity < BoundedContextUtilsImpl.ENTITY_SIMILARITY_CUTOFF){
             return new ImmutablePair<>(nameSimilarity, new HashMap<>());
         }
@@ -101,7 +101,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
                                 .stream()
                                 .collect(Collectors.toMap(
                                         // the similarity of field one and field 2
-                                        y -> localFieldSimilarity(x, y),
+                                        y -> localFieldSimilarity(x, y, useWuPalmer),
                                         // field 2
                                         y -> y,
                                         (oldValue,newValue) -> newValue,
@@ -184,8 +184,15 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
      * @return the Wu Palmer similarity of these names
      */
     @Override
-    public double nameSimilarity(String one, String two) {
-        return wordSimilarity(NameStripper.getBasicName(one), POS.n, NameStripper.getBasicName(two), POS.n);
+    public double nameSimilarity(String one, String two, boolean useWuPalmer) {
+        if(useWuPalmer) return  wuPalmerWordSimilarity(NameStripper.getBasicName(one), POS.n, NameStripper.getBasicName(two), POS.n);
+        else return basicWordSimilarity(NameStripper.getBasicName(one), NameStripper.getBasicName(two));
+    }
+
+
+    private static double basicWordSimilarity(String word1, String word2){
+        if(word1.equalsIgnoreCase(word2)) return 1.0;
+        else return 0.0;
     }
 
     /**
@@ -197,7 +204,7 @@ public class SimilarityUtilsImpl implements SimilarityUtils {
      * @return the wu palmer similarity of the words given their pos
      */
     // https://blog.thedigitalgroup.com/words-similarityrelatedness-using-wupalmer-algorithm
-    private static double wordSimilarity(String word1, POS posWord1, String word2, POS posWord2) {
+    private static double wuPalmerWordSimilarity(String word1, POS posWord1, String word2, POS posWord2) {
         double maxScore = 0.0;
         try {
             WS4JConfiguration.getInstance().setMFS(true);

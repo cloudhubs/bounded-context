@@ -21,7 +21,7 @@ public interface BoundedContextUtils {
      * @param systemContext the system context
      * @return the bounded context
      */
-    BoundedContext createBoundedContext(SystemContext systemContext);
+    BoundedContext createBoundedContext(SystemContext systemContext, boolean useWuPalmer);
 
     /**
      * merges two entities together using the field mapping
@@ -38,7 +38,7 @@ public interface BoundedContextUtils {
      * @param two the other module
      * @return a new module comprised of the other two
      */
-    Module mergeModules(Module one, Module two);
+    Module mergeModules(Module one, Module two, boolean useWuPalmer);
 
     /**
      * merges two fields into one field

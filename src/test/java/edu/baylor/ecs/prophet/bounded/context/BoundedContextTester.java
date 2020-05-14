@@ -277,7 +277,7 @@ public class BoundedContextTester {
         @Test
         @DisplayName("Merge Modules")
         public void testModuleMerge(){
-            Module returnModule = boundedContextUtils.mergeModules(moduleOne, moduleTwo);
+            Module returnModule = boundedContextUtils.mergeModules(moduleOne, moduleTwo, true);
             assertNotNull(returnModule.getName());
             assertNotEquals("", returnModule.getName());
             assertTrue(returnModule.getEntities().size() <= moduleOne.getEntities().size() + moduleTwo.getEntities().size());
@@ -314,7 +314,7 @@ public class BoundedContextTester {
                 // associate the second entity with the second module
                 moduleTwo.getEntities().add(entityTwo);
 
-                Module mergedModule = boundedContextUtils.mergeModules(moduleOne, moduleTwo);
+                Module mergedModule = boundedContextUtils.mergeModules(moduleOne, moduleTwo, true);
 
                 // make sure that there are two entities in the merged module
                 assertEquals(expectedNumMergedEntities, mergedModule.getEntities().size());
@@ -326,7 +326,7 @@ public class BoundedContextTester {
     @DisplayName("Generate Bounded Context")
     public void testBoundedContext(){
         SystemContext systemContext   = new SystemContext("test System", new HashSet<>(Arrays.asList(moduleOne, moduleTwo)));
-        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
+        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext, true);
         assertNotNull(boundedContext.getSystemName());
         assertNotEquals(boundedContext.getSystemName().length(), 0);
     }
@@ -335,7 +335,7 @@ public class BoundedContextTester {
     @DisplayName("Jan Master Project Test")
     public void janTest() throws FileNotFoundException{
         SystemContext systemContext = FileManager.readSystemContextFromFile("src/test/resources/jan_systemContext.json");
-        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
+        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext, true);
         assertNotNull(boundedContext.getSystemName());
     }
 
@@ -343,7 +343,7 @@ public class BoundedContextTester {
     @DisplayName("TSM2 Test")
     public void tsm2Test() throws FileNotFoundException{
         SystemContext systemContext = FileManager.readSystemContextFromFile("src/test/resources/tsm2_systemContext.json");
-        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext);
+        BoundedContext boundedContext = boundedContextUtils.createBoundedContext(systemContext, true);
         assertNotNull(boundedContext.getSystemName());
     }
 }
