@@ -26,7 +26,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
     // tools used for finding similarities
     private SimilarityUtils similarityUtils = new SimilarityUtilsImpl();
 
-    public static double ENTITY_SIMILARITY_CUTOFF = .9;
+    public static double ENTITY_SIMILARITY_CUTOFF = 0.9;
 
     /**
      * creates a bounded context for the system context
@@ -34,7 +34,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
      * @return the bounded context
      */
     @Override
-    public BoundedContext createBoundedContext(SystemContext systemContext) {
+    public BoundedContext createBoundedContext(SystemContext systemContext, boolean useWuPalmer) {
 
         // sanitize all of the name in the systemContext
         NameStripper.sanitizeSystemContext(systemContext);
@@ -49,7 +49,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         while(moduleStack.size() > 1) {
             Module m1 = moduleStack.pop();
             Module m2 = moduleStack.pop();
-            Module result = mergeModules(m1, m2);
+            Module result = mergeModules(m1, m2, useWuPalmer);
             if (result.getEntities().size() > 0) {
                 moduleStack.push(result);
             }
@@ -66,7 +66,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
      * @return a new module comprised of the other two
      */
     @Override
-    public Module mergeModules(Module moduleOne, Module moduleTwo){
+    public Module mergeModules(Module moduleOne, Module moduleTwo, boolean useWuPalmer){
 
         // for each entity find the similarity it has to other entities
         Map<Entity, TreeMap<Double, ImmutablePair<Entity, Map<Field, Field>>>>
@@ -91,12 +91,12 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
                     .collect(Collectors.toMap(
 
                         // similarity of entity from module one and entity from module two
-                        y -> similarityUtils.globalFieldSimilarity(x, y).getLeft(),
+                        y -> similarityUtils.globalFieldSimilarity(x, y, useWuPalmer).getLeft(),
 
                         // tuple of entity from module two
                         y -> new ImmutablePair<>(y,
                                 //and the field mapping
-                                similarityUtils.globalFieldSimilarity(x, y).getRight()),
+                                similarityUtils.globalFieldSimilarity(x, y, useWuPalmer).getRight()),
                         (oldValue,newValue) -> newValue,
                         TreeMap::new
                     ))

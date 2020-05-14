@@ -19,5 +19,5 @@ public interface BoundedContextApi {
      * @param systemName
      * @return
      */
-    BoundedContext getBoundedContext(SystemContext systemName);
+    BoundedContext getBoundedContext(SystemContext systemName, boolean useWuPalmer);
 }

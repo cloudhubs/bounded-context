@@ -23,8 +23,8 @@ public class BoundedContextApiImpl implements BoundedContextApi {
      * @return the bounded context for that system
      */
     @Override
-    public BoundedContext getBoundedContext(SystemContext systemContext) {
+    public BoundedContext getBoundedContext(SystemContext systemContext, boolean useWuPalmer) {
         BoundedContextUtils boundedContextUtils = new BoundedContextUtilsImpl();
-        return boundedContextUtils.createBoundedContext(systemContext);
+        return boundedContextUtils.createBoundedContext(systemContext, useWuPalmer);
     }
 }
