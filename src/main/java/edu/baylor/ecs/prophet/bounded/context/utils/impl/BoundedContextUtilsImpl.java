@@ -41,8 +41,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 
         Set<Module> modules = systemContext.getModules();
         Stack<Module> moduleStack = new Stack<>();
-        for (Module m: modules
-             ) {
+        for (Module m: modules) {
             moduleStack.add(m.clone());
         }
 //        moduleStack.addAll(modules);
@@ -109,7 +108,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         // sets the entities of the new module
         newModule.getEntities().addAll(
 
-                // stream of all entries in entitysimilarity
+                // stream of all entries in entity similarity
                 entitySimilarity.entrySet().stream()
 
                         // if the similarity is strong enough
@@ -161,7 +160,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
      * @param one the first entity to merge
      * @param two the second entity to merge
      * @param fieldMapping the mapping between the fields of the entities
-     * @return the newly creataed merged entity
+     * @return the newly created merged entity
      */
     @Override
     public Entity mergeEntities(Entity one, Entity two, Map<Field, Field> fieldMapping) {
@@ -258,6 +257,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
         String type = Type.get(one.getType()).ordinal() < Type.get(two.getType()).ordinal() ? two.getType() : one.getType();
 
         Field toReturn = new Field(type, name);
+
+        // set isCollection
+        toReturn.setCollection(one.isCollection() || two.isCollection());
 
         // set the annotations
         toReturn.setAnnotations(one.getAnnotations());
