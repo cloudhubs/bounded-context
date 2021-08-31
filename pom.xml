@@ -40,11 +40,17 @@
             <version>3.9</version>
         </dependency>
 
-        <dependency>
+       <!--  <dependency>
             <groupId>com.sciss</groupId>
             <artifactId>ws4j</artifactId>
             <version>1.0.1</version>
-        </dependency>
+        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/edu.cmu.lti/ws4j -->
+		<dependency>
+		    <groupId>edu.cmu.lti</groupId>
+		    <artifactId>ws4j</artifactId>
+		    <version>1.0.1</version>
+		</dependency>
         <dependency>
             <groupId>edu.baylor.ecs.cloudhubs</groupId>
             <artifactId>prophet-dto</artifactId>
