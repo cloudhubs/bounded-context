@@ -47,16 +47,16 @@
         </dependency> -->
         <!-- https://mvnrepository.com/artifact/edu.cmu.lti/ws4j -->
 		
-		<dependency>
+		<!-- <dependency>
 		    <groupId>edu.cmu.lti</groupId>
 		    <artifactId>ws4j</artifactId>
 		    <version>1.0.1</version>
-		</dependency>
-		<!-- <dependency>
-		    <groupId>com.github.cloudhubs</groupId>
-		    <artifactId>ws4j-ex</artifactId>
-		    <version>expansion-base-SNAPSHOT</version>
 		</dependency> -->
+		<dependency>
+		    <groupId>com.github.cloudhubs</groupId>
+		    <artifactId>ws4j</artifactId>
+		    <version>main-SNAPSHOT</version>
+		</dependency>
 		
        <!--  <dependency>
             <groupId>edu.baylor.ecs.cloudhubs</groupId>
