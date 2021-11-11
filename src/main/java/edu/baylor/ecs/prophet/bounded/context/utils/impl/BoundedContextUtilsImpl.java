@@ -13,8 +13,6 @@ import edu.baylor.ecs.prophet.bounded.context.utils.BoundedContextUtils;
 import edu.baylor.ecs.prophet.bounded.context.utils.SimilarityUtils;
 import edu.baylor.ecs.prophet.bounded.context.utils.impl.util.EntityCollection;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,7 +26,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 	// tools used for finding similarities
 	private SimilarityUtils similarityUtils = new SimilarityUtilsImpl();
 
-	public static double ENTITY_SIMILARITY_CUTOFF = 0.9;
+	public static final double ENTITY_SIMILARITY_CUTOFF = 0.9;
 
 	/**
 	 * creates a bounded context for the system context
@@ -76,9 +74,6 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 		EntityCollection entitySimilarity = new EntityCollection(moduleOne, moduleTwo, ENTITY_SIMILARITY_CUTOFF,
 				(e1, e2) -> similarityUtils.globalFieldSimilarity(e1, e2, useWuPalmer));
 
-		// shows which entities in module two are encountered
-		Set<Entity> mappedInTwo = new HashSet<>();
-
 		// Generate blank new module
 		Module newModule = new Module(moduleOne.getName().getName());
 		newModule.setEntities(entitySimilarity.getDistinctEntities());
@@ -86,18 +81,8 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 		// Merge all duplicate entities and add to the new module
 		newModule.getEntities().addAll(entitySimilarity.getSimilarEntities().stream()
 
-				// Map entity/duplicate mappings to a merged entity
-				.map(x -> mergeEntities(x.entity(), x.similarEntity(), x.fieldMap()))
-
-				// collect as a list
-				.toList());
-
-		// now add all of the entities in module two that were not mapped to
-		for (Entity e : moduleTwo.getEntities()) {
-			if (!mappedInTwo.contains(e)) {
-				newModule.getEntities().add(e);
-			}
-		}
+				// Map entity/duplicate mappings to a list of merged entities
+				.map(x -> mergeEntities(x.entity(), x.similarEntity(), x.fieldMap())).toList());
 
 		return newModule;
 	}

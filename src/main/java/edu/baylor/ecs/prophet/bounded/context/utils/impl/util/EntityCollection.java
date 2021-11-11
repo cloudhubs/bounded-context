@@ -44,29 +44,34 @@ public class EntityCollection {
 		Objects.requireNonNull(mod1, "mod1 cannot be null");
 		Objects.requireNonNull(mod2, "mod2 cannot be null");
 
-		// Determine which entities have no matches at all
+		// Split entities into two sets: those with a match, and those without
 		var splitEntityRecords = mod1.getEntities().stream()
-				// Map entities in module 1 to their most similar counterpart in module 2
 				.map(mod1Entity -> findMostSimilar(mod1Entity, mod2, computeSimilarity))
-				// Split into those with a match in the module 2 and those without
 				.collect(Collectors.partitioningBy(Optional::isPresent));
 
-		// All entities with no match are distinct; put them in distinct lists
+		// All entities with no match are distinct; put them in the distinct list
 		splitEntityRecords.get(false).stream().map(entry -> entry.get().getRight().entity().clone())
 				.forEach(distinctEntities::add);
 
-		// Use similarity score to categorize similar and distinct entities
-		splitEntityRecords.get(true).forEach(similarityRecord -> {
+		// Use similarity score to find which matches are false positives
+		Set<Entity> mappedInTwo = new HashSet<>(); // Index for which entities already handled
+		for (var similarityRecord : splitEntityRecords.get(true)) {
+			// Unwrap the optional/tuple
 			ImmutablePair<Double, SimilarityRecord> record = similarityRecord.get();
 			Entity entity = record.getRight().entity();
+
+			// If the similarity threshhold is exceeded, this is a true match; otherwise,
+			// record as a distinct entity.
 			if (record.getLeft() > matchThreshhold) {
-				// Distinct, store to distinct list
-				distinctEntities.add(entity.copyWithNamePreface(mod1.getName() + "::"));
-			} else {
-				// Similar, store to similar map
+				mappedInTwo.add(entity);
 				similarEntities.add(record.getRight());
+			} else {
+				distinctEntities.add(entity.copyWithNamePreface(mod1.getName() + "::"));
 			}
-		});
+		}
+
+		// Take all fields from module 2 not already handled, and record them
+		mod2.getEntities().stream().filter(e -> !mappedInTwo.contains(e)).forEach(distinctEntities::add);
 	}
 
 	/**
