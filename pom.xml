@@ -63,12 +63,12 @@
             <artifactId>prophet-dto</artifactId>
             <version>0.0.8</version>
         </dependency> -->
-        
+	        
         <dependency>
-	    	<groupId>com.github.cloudhubs</groupId>
-	    	<artifactId>prophet-dto</artifactId>
-	    	<version>expansion-base-SNAPSHOT</version>
-		</dependency>
+            <groupId>com.github.cloudhubs</groupId>
+            <artifactId>prophet-dto</artifactId>
+            <version>modernize-prophet-dto-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
