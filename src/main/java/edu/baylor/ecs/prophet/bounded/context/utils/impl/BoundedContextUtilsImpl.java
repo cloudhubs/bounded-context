@@ -82,7 +82,7 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
 		newModule.getEntities().addAll(entitySimilarity.getSimilarEntities().stream()
 
 				// Map entity/duplicate mappings to a list of merged entities
-				.map(x -> mergeEntities(x.entity(), x.similarEntity(), x.fieldMap())).toList());
+				.map(x -> mergeEntities(x.getEntity(), x.getSimilarEntity(), x.getFieldMap())).toList());
 
 		return newModule;
 	}

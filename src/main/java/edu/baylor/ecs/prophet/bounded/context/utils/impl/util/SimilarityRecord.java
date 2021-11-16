@@ -6,6 +6,7 @@ import java.util.Objects;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Entity;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Field;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 
 /**

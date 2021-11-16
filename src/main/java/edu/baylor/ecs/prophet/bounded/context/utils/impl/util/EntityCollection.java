@@ -50,7 +50,7 @@ public class EntityCollection {
 				.collect(Collectors.partitioningBy(Optional::isPresent));
 
 		// All entities with no match are distinct; put them in the distinct list
-		splitEntityRecords.get(false).stream().map(entry -> entry.get().getRight().entity().clone())
+		splitEntityRecords.get(false).stream().map(entry -> entry.get().getRight().getEntity().clone())
 				.forEach(distinctEntities::add);
 
 		// Use similarity score to find which matches are false positives
@@ -58,7 +58,7 @@ public class EntityCollection {
 		for (var similarityRecord : splitEntityRecords.get(true)) {
 			// Unwrap the optional/tuple
 			ImmutablePair<Double, SimilarityRecord> record = similarityRecord.get();
-			Entity entity = record.getRight().entity();
+			Entity entity = record.getRight().getEntity();
 
 			// If the similarity threshhold is exceeded, this is a true match; otherwise,
 			// record as a distinct entity.
