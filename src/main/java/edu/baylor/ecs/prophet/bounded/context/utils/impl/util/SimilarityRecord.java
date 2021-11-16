@@ -5,6 +5,8 @@ import java.util.Objects;
 
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Entity;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Field;
+import lombok.Data;
+import lombok.NonNull;
 
 /**
  * Wraps an entity, an entity that has been identified as "similar", and the
@@ -12,10 +14,9 @@ import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Field;
  * 
  * @author Micah
  */
-public record SimilarityRecord(Entity entity, Entity similarEntity, Map<Field, Field> fieldMap) {
-	public SimilarityRecord {
-		Objects.requireNonNull(entity, "entity cannot be null");
-		Objects.requireNonNull(similarEntity, "similarEntity cannot be null");
-		Objects.requireNonNull(fieldMap, "fieldMap cannot be null");
-	}
+@Data
+public class SimilarityRecord {
+	@NonNull Entity entity;
+	@NonNull Entity similarEntity;
+	@NonNull Map<Field, Field> fieldMap;
 }
