@@ -14,6 +14,7 @@ import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Entity;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Field;
 import edu.baylor.ecs.cloudhubs.prophetdto.systemcontext.Module;
 import lombok.Getter;
+import lombok.var;
 
 /**
  * An container that takes two modules and stores all entities within the first
