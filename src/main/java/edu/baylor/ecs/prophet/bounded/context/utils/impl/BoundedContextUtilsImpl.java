@@ -49,9 +49,9 @@ public class BoundedContextUtilsImpl implements BoundedContextUtils {
             Module m1 = moduleStack.pop();
             Module m2 = moduleStack.pop();
             Module result = mergeModules(m1, m2, useWuPalmer);
-            if (result.getEntities().size() > 0) {
-                moduleStack.push(result);
-            }
+//          if (result.getEntities().size() > 0) {
+            moduleStack.push(result);
+//          }
         }
 
         return new BoundedContext(systemContext.getSystemName(), moduleStack.size() > 0 ? moduleStack.get(0).getEntities() : null);
